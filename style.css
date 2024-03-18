@@ -1,0 +1,10 @@
+body{
+    background: linear-gradient(white, pink);
+    font-size: 20px;
+}
+.smth{
+    text-decoration: underline;
+    font-size: 40px;
+    color: darkred;
+    text-align: center;
+}

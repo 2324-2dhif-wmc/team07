@@ -1,0 +1,7 @@
+-Webseiten für die Hilfe für Augmented Reality
+https://ar-js-org.github.io/AR.js-Docs/
+https://www.maps.ie/coordinates.html
+
+
+-Video für Paarung von Händy zur Webseite
+https://www.youtube.com/watch?v=KI29qb0xcsM
