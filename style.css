@@ -8,3 +8,10 @@ body{
     color: darkred;
     text-align: center;
 }
+.important{
+    color: red;
+    font-size: 30px;
+}
+.pretty{
+    margin-right: 80px;
+}
