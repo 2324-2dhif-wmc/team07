@@ -1,9 +1,12 @@
-<!-- A-Frame itself -->
-<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+document.addEventListener('DOMContentLoaded', function() {
+    const videoElement = document.getElementById('videoElement');
 
-<!-- Pure three.js code that the A-Frame components use for location-based AR -->
-<script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar-threex-location-only.js'></script>
-
-<!-- AR.js A-Frame components -->
-<script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js'></script>
-
+    // Get access to the camera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(stream) {
+            videoElement.srcObject = stream;
+        })
+        .catch(function(err) {
+            console.error('Error accessing the camera: ', err);
+        });
+});
