@@ -15,11 +15,16 @@
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
     <a-box
-            latitude="48.268204"
-            longitude="14.252109"
-           material="color: red;"
-            position="0 0 5"
-        scale="2 2 2">
+            id="myCube"
+            gps-entity-place="latitude: 48.268204; longitude: 14.252109;"
+            material="color: red;"
+            position="5 5 5"
+            rotation="0 45 0"
+            scale="2 2 2"
+            depth="1"
+            height="1"
+            width="1"
+            visible="false">
     </a-box>
     <!--
           position="5 5 5"
@@ -43,5 +48,14 @@
     --->
     <a-camera gps-camera rotation-reader> </a-camera>
 </a-scene>
+<script>
+    document.getElementById('myCube').addEventListener('gps-entity-place-changed', function() {
+        var latitude = this.getAttribute('gps-entity-place').latitude;
+        var longitude = this.getAttribute('gps-entity-place').longitude;
+        if (latitude === 48.268204 && longitude === 14.252109) {
+            this.setAttribute('visible', true);
+        }
+    });
+</script>
 </body>
 </html>
