@@ -48,9 +48,10 @@
     --->
     <a-camera gps-camera rotation-reader> </a-camera>
 </a-scene>
+<!--
 <script>
-    const targetLatitude = 48.268204;
-    const targetLongitude = 14.252109;
+    const targetLatitude = 48.268317;
+    const targetLongitude = 14.251900;
 
     // Function to check if coordinates match
     function checkCoordinates() {
@@ -62,6 +63,36 @@
             cube.setAttribute('visible', true);
         } else {
             cube.setAttribute('visible', false);
+        }
+    }
+
+    // Continuously check coordinates
+    setInterval(checkCoordinates, 1000); // check every second
+</script>
+--->
+<script>
+    const targetLatitude = 48.268204;
+    const targetLongitude = 14.252109;
+    const latRange = 0.0001; // range of latitude within which the object should be visible
+    const lonRange = 0.0001; // range of longitude within which the object should be visible
+
+    //5*5 Meter const latRange = 5 / 111320; // range of latitude within which the object should be visible
+    //const lonRange = 5 / (111320 * Math.cos(targetLatitude * Math.PI / 180));
+    // Function to check if coordinates are within the range
+    function checkCoordinates() {
+        const cube = document.getElementById('myCube');
+        const camera = document.getElementById('camera');
+        const cameraPosition = camera.components['gps-camera'].currentCoords;
+
+        if (cameraPosition) {
+            const isWithinLatRange = Math.abs(cameraPosition.latitude - targetLatitude) <= latRange;
+            const isWithinLonRange = Math.abs(cameraPosition.longitude - targetLongitude) <= lonRange;
+
+            if (isWithinLatRange && isWithinLonRange) {
+                cube.setAttribute('visible', true);
+            } else {
+                cube.setAttribute('visible', false);
+            }
         }
     }
 
