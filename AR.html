@@ -49,13 +49,24 @@
     <a-camera gps-camera rotation-reader> </a-camera>
 </a-scene>
 <script>
-    document.getElementById('myCube').addEventListener('gps-entity-place-changed', function() {
-        var latitude = this.getAttribute('gps-entity-place').latitude;
-        var longitude = this.getAttribute('gps-entity-place').longitude;
-        if (latitude === 48.268204 && longitude === 14.252109) {
-            this.setAttribute('visible', true);
+    const targetLatitude = 48.268204;
+    const targetLongitude = 14.252109;
+
+    // Function to check if coordinates match
+    function checkCoordinates() {
+        const cube = document.getElementById('myCube');
+        const camera = document.getElementById('camera');
+        const cameraPosition = camera.components['gps-camera'].currentCoords;
+
+        if (cameraPosition.latitude === targetLatitude && cameraPosition.longitude === targetLongitude) {
+            cube.setAttribute('visible', true);
+        } else {
+            cube.setAttribute('visible', false);
         }
-    });
+    }
+
+    // Continuously check coordinates
+    setInterval(checkCoordinates, 1000); // check every second
 </script>
 </body>
 </html>
