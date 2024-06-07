@@ -14,6 +14,13 @@
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
+    <a-text
+            value="This content will always face you."
+            look-at="[gps-camera]"
+            scale="10 10 10"
+            gps-entity-place="latitude: 48.140098; longitude: 14.236085;"
+    ></a-text>
+    <!--
     <a-box
             id="myCube"
             gps-entity-place="latitude: 48.268204; longitude: 14.252109;"
@@ -26,7 +33,7 @@
             width="1"
             visible="false">
     </a-box>
-    <!--
+
           position="5 5 5"
           rotation="0 45 0"
           scale="2 2 2"
@@ -69,7 +76,7 @@
     // Continuously check coordinates
     setInterval(checkCoordinates, 1000); // check every second
 </script>
---->
+
 <script>
     //const targetLatitude = 48.268204;
    // const targetLongitude = 14.252109;
@@ -102,5 +109,6 @@
     // Continuously check coordinates
     setInterval(checkCoordinates, 1000); // check every second
 </script>
+-->
 </body>
 </html>
