@@ -6,46 +6,41 @@
     <title>GeoAR.js demo</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
-
 <body>
+Test36
 <a-scene
         vr-mode-ui="enabled: false"
+        embedded
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
-    Test35
     <a-text
             value="Stair"
-            look-at="[gps-camera]"
+            look-at="[gps-new-camera]"
             scale="10 10 10"
-            gps-entity-place="latitude: 48.1435; longitude: 14.2356; maxDistance: 5"
+            gps-new-entity-place="latitude: 48.1435; longitude: 14.2356;"
+            visible="false"
     ></a-text>
-    <a-camera gps-camera rotation-reader> </a-camera>
-    <!--gps-new-camera='gpsMaxDistance: 5'-->
+    <a-camera gps-new-camera="gpsMinDistance: 5" rotation-reader></a-camera>
 </a-scene>
-</body>
-</html>
-<!--
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>GeoAR.js demo</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-</head>
-<body>
-<a-scene
-        vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
->
-    <a-entity material='color: red' geometry='primitive: box' gps-new-entity-place="latitude: 48.198168; longitude: 14.244446" scale="10 10 10"></a-entity>
 
-    <a-camera gps-camera rotation-reader> </a-camera>
-</a-scene>
+<script>
+    AFRAME.registerComponent('check-distance', {
+        init: function() {
+            this.el.sceneEl.addEventListener('gps-entity-place-update-position', (event) => {
+                const entity = document.querySelector('[gps-new-entity-place]');
+                const distance = entity.components['gps-new-entity-place'].distance;
+                if (distance <= 5) {
+                    entity.setAttribute('visible', 'true');
+                } else {
+                    entity.setAttribute('visible', 'false');
+                }
+            });
+        }
+    });
+
+    document.querySelector('a-camera').setAttribute('check-distance', '');
+</script>
 </body>
 </html>
--->
