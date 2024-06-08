@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-<div id="debug-info">1Distance: N/A</div>
+<div id="debug-info">2Distance: N/A</div>
 
 <a-scene
         vr-mode-ui="enabled: false"
@@ -38,35 +38,58 @@
 </a-scene>
 
 <script>
-    AFRAME.registerComponent('check-distance', {
-        init: function() {
-            var textEntity = document.querySelector('#info-text');
-            var debugInfo = document.querySelector('#debug-info');
-
-            this.el.sceneEl.addEventListener('gps-camera-update-position', function(event) {
-                var position = event.detail.position;
-                console.log('Camera GPS position updated:', position);
-
-                var distance = textEntity.components['gps-new-entity-place'].distance;
-                console.log('Distance to entity:', distance);
-
-                if (distance !== undefined) {
-                    debugInfo.innerHTML = 'Distance: ' + distance;  // Update debug info on the screen
-
-                    if (distance <= 5) {
-                        textEntity.setAttribute('visible', 'true');
-                    } else {
-                        textEntity.setAttribute('visible', 'false');
-                    }
-                } else {
-                    debugInfo.innerHTML = 'Distance: calculating...';
+    function requestLocationPermissions() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    console.log('GPS permission granted');
+                    initializeAR();
+                },
+                function(error) {
+                    console.error('Error requesting GPS permission', error);
+                    alert('GPS permission is required to use this application.');
                 }
-            });
+            );
+        } else {
+            alert('Geolocation is not supported by this browser.');
         }
-    });
+    }
 
-    document.querySelector('a-camera').setAttribute('check-distance', '');
+    function initializeAR() {
+        AFRAME.registerComponent('check-distance', {
+            init: function() {
+                var textEntity = document.querySelector('#info-text');
+                var debugInfo = document.querySelector('#debug-info');
+
+                this.el.sceneEl.addEventListener('gps-camera-update-position', function(event) {
+                    var position = event.detail.position;
+                    console.log('Camera GPS position updated:', position);
+
+                    var distance = textEntity.components['gps-new-entity-place'].distance;
+                    console.log('Distance to entity:', distance);
+
+                    if (distance !== undefined) {
+                        debugInfo.innerHTML = 'Distance: ' + distance;  // Update debug info on the screen
+
+                        if (distance <= 5) {
+                            textEntity.setAttribute('visible', 'true');
+                        } else {
+                            textEntity.setAttribute('visible', 'false');
+                        }
+                    } else {
+                        debugInfo.innerHTML = 'Distance: calculating...';
+                    }
+                });
+            }
+        });
+
+        document.querySelector('a-camera').setAttribute('check-distance', '');
+    }
+
+    // Request location permissions on page load
+    window.onload = function() {
+        requestLocationPermissions();
+    };
 </script>
 </body>
 </html>
-
