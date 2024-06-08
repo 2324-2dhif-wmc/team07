@@ -19,60 +19,18 @@
     </style>
 </head>
 <body>
-<div id="debug-info">3Distance: N/A</div>
-
-<a-scene
-        vr-mode-ui="enabled: false"
-        embedded
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
->
-    <a-text
-            id="info-text"
-            value="Stair"
-            look-at="[gps-new-camera]"
-            scale="10 10 10"
-            gps-new-entity-place="latitude: 48.1435; longitude: 14.2356;"
-            visible="false"
-    ></a-text>
-    <a-camera gps-new-camera="gpsMinDistance: 5" rotation-reader></a-camera>
-</a-scene>
+<div id="debug-info">Distance: N/A</div>
 
 <script>
-    AFRAME.registerComponent('check-distance', {
-        init: function() {
-            var textEntity = document.querySelector('#info-text');
-            var debugInfo = document.querySelector('#debug-info');
-
-            this.el.sceneEl.addEventListener('gps-camera-update-position', function(event) {
-                var position = event.detail.position;
-                console.log('Camera GPS position updated:', position);
-
-                var distance = textEntity.components['gps-new-entity-place'].distance;
-                console.log('Distance to entity:', distance);
-
-                if (distance !== undefined) {
-                    debugInfo.innerHTML = 'Distance: ' + distance;  // Update debug info on the screen
-
-                    if (distance <= 5) {
-                        textEntity.setAttribute('visible', 'true');
-                    } else {
-                        textEntity.setAttribute('visible', 'false');
-                    }
-                } else {
-                    debugInfo.innerHTML = 'Distance: calculating...';
-                }
-            });
-        }
-    });
-
-    document.querySelector('a-camera').setAttribute('check-distance', '');
-
     // Request location permissions on page load
     window.onload = function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     console.log('GPS permission granted', position);
+
+                    // Initialize AR scene after permission is granted
+                    initARScene();
                 },
                 function(error) {
                     console.error('Error requesting GPS permission', error);
@@ -83,6 +41,62 @@
             alert('Geolocation is not supported by this browser.');
         }
     };
+
+    // Initialize AR scene
+    function initARScene() {
+        const scene = document.querySelector('a-scene');
+        const textEntity = document.querySelector('#info-text');
+        const debugInfo = document.querySelector('#debug-info');
+
+        // Register component to check distance and update text visibility
+        AFRAME.registerComponent('check-distance', {
+            tick: function() {
+                const camera = this.el.getObject3D('camera');
+                const textPosition = textEntity.object3D.position;
+                const cameraPosition = camera.position;
+
+                // Calculate distance between camera and text entity
+                const distance = cameraPosition.distanceTo(textPosition);
+
+                debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2);
+
+                // Toggle text visibility based on distance
+                if (distance <= 5) {
+                    textEntity.setAttribute('visible', true);
+                } else {
+                    textEntity.setAttribute('visible', false);
+                }
+            }
+        });
+
+        // Add AR text entity to the scene
+        textEntity.setAttribute('gps-entity-place', {
+            latitude: 48.1435,
+            longitude: 14.2356
+        });
+
+        // Initialize AR camera with minimum distance
+        const camera = document.createElement('a-camera');
+        camera.setAttribute('gps-camera', 'gpsMinDistance: 5');
+        camera.setAttribute('rotation-reader', '');
+        camera.setAttribute('check-distance', '');
+        scene.appendChild(camera);
+    }
 </script>
+
+<a-scene
+        vr-mode-ui="enabled: false"
+        embedded
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
+>
+    <a-text
+            id="info-text"
+            value="Stair"
+            look-at="[gps-camera]"
+            scale="10 10 10"
+            visible="false"
+    ></a-text>
+</a-scene>
+
 </body>
 </html>
