@@ -14,13 +14,15 @@
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
+    Test34
     <a-text
             value="Stair"
             look-at="[gps-camera]"
             scale="10 10 10"
-            gps-entity-place="latitude: 48.143517; longitude: 14.235612;"
+            gps-entity-place="latitude: 48.143517; longitude: 14.235612; maxDistance: 5"
     ></a-text>
     <a-camera gps-camera rotation-reader> </a-camera>
+    <!--gps-new-camera='gpsMaxDistance: 5'-->
 </a-scene>
 </body>
 </html>
