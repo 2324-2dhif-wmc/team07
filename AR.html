@@ -39,7 +39,7 @@
                 function(error) {
                     handleGPSError(error);
                 },
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 } // Increased timeout to 10 seconds
+                { enableHighAccuracy: false, maximumAge: 5000, timeout: 30000 } // Increased timeout to 30 seconds, maximumAge to 5 seconds, high accuracy disabled
             );
         } else {
             alert('Geolocation is not supported by this browser.');
@@ -52,7 +52,8 @@
         } else if (error.code === error.POSITION_UNAVAILABLE) {
             alert('Location information is unavailable. Please ensure your GPS is enabled.');
         } else if (error.code === error.TIMEOUT) {
-            alert('The request to get user location timed out. Please try again.');
+            alert('The request to get user location timed out. Retrying...');
+            setTimeout(requestGPS, 10000); // Retry the GPS request after 10 seconds
         } else {
             alert('An unknown error occurred. Please try again.');
         }
