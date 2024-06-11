@@ -32,27 +32,29 @@
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(
                 function(position) {
-                    console.log('GPS permission granted', position);
                     if (!componentRegistered) {
                         initARScene(position.coords);
                     }
                 },
                 function(error) {
-                    console.error('Error requesting GPS permission', error);
-                    if (error.code === error.PERMISSION_DENIED) {
-                        alert('GPS permission is required to use this application.');
-                    } else if (error.code === error.POSITION_UNAVAILABLE) {
-                        alert('Location information is unavailable. Please ensure your GPS is enabled.');
-                    } else if (error.code === error.TIMEOUT) {
-                        alert('The request to get user location timed out. Please try again.');
-                    } else {
-                        alert('An unknown error occurred. Please try again.');
-                    }
+                    handleGPSError(error);
                 },
                 { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 } // Increased timeout to 10 seconds
             );
         } else {
             alert('Geolocation is not supported by this browser.');
+        }
+    }
+
+    function handleGPSError(error) {
+        if (error.code === error.PERMISSION_DENIED) {
+            alert('GPS permission is required to use this application.');
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+            alert('Location information is unavailable. Please ensure your GPS is enabled.');
+        } else if (error.code === error.TIMEOUT) {
+            alert('The request to get user location timed out. Please try again.');
+        } else {
+            alert('An unknown error occurred. Please try again.');
         }
     }
 
@@ -69,8 +71,6 @@
                     if (cameraPosition && entityPosition) {
                         var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
                         debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
-                        console.log('Camera Position:', cameraPosition);
-                        console.log('Entity Position:', entityPosition);
 
                         if (distance <= 5) {
                             textEntity.setAttribute('visible', true);
@@ -107,8 +107,6 @@
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
-
-        console.log('Initial GPS Coordinates:', initialCoords.latitude, initialCoords.longitude);
     }
 </script>
 
