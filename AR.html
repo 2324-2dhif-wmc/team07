@@ -44,39 +44,52 @@
 
     // Initialize AR scene
     function initARScene() {
-        const scene = document.querySelector('a-scene');
-        const textEntity = document.querySelector('#info-text');
-        const debugInfo = document.querySelector('#debug-info');
-
-        // Register component to check distance and update text visibility
         AFRAME.registerComponent('check-distance', {
             tick: function() {
-                const camera = this.el.getObject3D('camera');
-                const textPosition = textEntity.object3D.position;
-                const cameraPosition = camera.position;
+                var textEntity = document.querySelector('#info-text');
+                var debugInfo = document.querySelector('#debug-info');
 
-                // Calculate distance between camera and text entity
-                const distance = cameraPosition.distanceTo(textPosition);
+                // Get the GPS position of the camera and the entity
+                var cameraPosition = this.el.components['gps-camera'].currentCoords;
+                var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
-                debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2);
+                // Calculate the distance using the Haversine formula
+                if (cameraPosition && entityPosition) {
+                    var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
+                    debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
 
-                // Toggle text visibility based on distance
-                if (distance <= 5) {
-                    textEntity.setAttribute('visible', true);
+                    // Toggle visibility based on distance
+                    if (distance <= 5) {
+                        textEntity.setAttribute('visible', true);
+                    } else {
+                        textEntity.setAttribute('visible', false);
+                    }
                 } else {
-                    textEntity.setAttribute('visible', false);
+                    debugInfo.innerHTML = 'Distance: calculating...';
                 }
             }
         });
 
-        // Add AR text entity to the scene
-        textEntity.setAttribute('gps-entity-place', {
-            latitude: 48.1435,
-            longitude: 14.2356
-        });
+        // Calculate the distance between two points using the Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371e3; // metres
+            var φ1 = lat1 * Math.PI/180;
+            var φ2 = lat2 * Math.PI/180;
+            var Δφ = (lat2-lat1) * Math.PI/180;
+            var Δλ = (lon2-lon1) * Math.PI/180;
 
-        // Initialize AR camera with minimum distance
-        const camera = document.createElement('a-camera');
+            var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            var d = R * c; // in metres
+            return d;
+        }
+
+        // Add AR camera to the scene
+        var scene = document.querySelector('a-scene');
+        var camera = document.createElement('a-camera');
         camera.setAttribute('gps-camera', 'gpsMinDistance: 5');
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
@@ -94,6 +107,7 @@
             value="Stair"
             look-at="[gps-camera]"
             scale="10 10 10"
+            gps-entity-place="latitude: 48.2681; longitude: 14.2516;"
             visible="false"
     ></a-text>
 </a-scene>
