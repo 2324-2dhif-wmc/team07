@@ -53,6 +53,10 @@
                 var cameraPosition = this.el.components['gps-camera'].currentCoords;
                 var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
+                // Log current positions for debugging
+                console.log('Camera Position:', cameraPosition);
+                console.log('Entity Position:', entityPosition);
+
                 // Calculate the distance using the Haversine formula
                 if (cameraPosition && entityPosition) {
                     var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
