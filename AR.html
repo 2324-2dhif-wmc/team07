@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,8 +53,11 @@
                 var cameraPosition = this.el.components['gps-camera'].currentCoords;
                 var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
-                // Calculate the distance using the Haversine formula
+    // Calculatethe distance using the Haversine formula
                 if (cameraPosition && entityPosition) {
+                    console.log('Camera Position:', cameraPosition);
+                    console.log('Entity Position:', entityPosition);
+
                     var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
                     debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
 
@@ -115,3 +117,4 @@
 
 </body>
 </html>
+
