@@ -22,26 +22,6 @@
 <div id="debug-info">Distance: N/A</div>
 
 <script>
-    // Request location permissions on page load
-    window.onload = function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    console.log('GPS permission granted', position);
-
-                    // Initialize AR scene after permission is granted
-                    initARScene();
-                },
-                function(error) {
-                    console.error('Error requesting GPS permission', error);
-                    alert('GPS permission is required to use this application.');
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by this browser.');
-        }
-    };
-
     // Initialize AR scene
     function initARScene() {
         AFRAME.registerComponent('check-distance', {
@@ -99,6 +79,27 @@
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
     }
+
+    // Request location permissions and initialize AR scene on page load
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(
+                function(position) {
+                    console.log('GPS permission granted', position);
+
+                    // Initialize AR scene after permission is granted
+                    initARScene();
+                },
+                function(error) {
+                    console.error('Error requesting GPS permission', error);
+                    alert('GPS permission is required to use this application.');
+                },
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+            );
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    };
 </script>
 
 <a-scene
