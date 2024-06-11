@@ -24,44 +24,51 @@
 <script>
     // Request location permissions on page load
     window.onload = function() {
+        requestGPS();
+    };
+
+    function requestGPS() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
+            navigator.geolocation.watchPosition(
                 function(position) {
                     console.log('GPS permission granted', position);
-
                     // Initialize AR scene after permission is granted
-                    initARScene();
+                    initARScene(position.coords);
                 },
                 function(error) {
                     console.error('Error requesting GPS permission', error);
-                    alert('GPS permission is required to use this application.');
-                }
+                    if (error.code === error.PERMISSION_DENIED) {
+                        alert('GPS permission is required to use this application.');
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        alert('Location information is unavailable.');
+                    } else if (error.code === error.TIMEOUT) {
+                        alert('The request to get user location timed out. Please try again.');
+                    } else {
+                        alert('An unknown error occurred.');
+                    }
+                },
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 } // Increased timeout to 10 seconds
             );
         } else {
             alert('Geolocation is not supported by this browser.');
         }
-    };
+    }
 
-    // Initialize AR scene
-    function initARScene() {
+    function initARScene(initialCoords) {
         AFRAME.registerComponent('check-distance', {
             tick: function() {
                 var textEntity = document.querySelector('#info-text');
                 var debugInfo = document.querySelector('#debug-info');
 
-                // Get the GPS position of the camera and the entity
                 var cameraPosition = this.el.components['gps-camera'].currentCoords;
                 var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
-    // Calculatethe distance using the Haversine formula
                 if (cameraPosition && entityPosition) {
+                    var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
+                    debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
                     console.log('Camera Position:', cameraPosition);
                     console.log('Entity Position:', entityPosition);
 
-                    var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
-                    debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
-
-                    // Toggle visibility based on distance
                     if (distance <= 5) {
                         textEntity.setAttribute('visible', true);
                     } else {
@@ -73,7 +80,6 @@
             }
         });
 
-        // Calculate the distance between two points using the Haversine formula
         function calculateDistance(lat1, lon1, lat2, lon2) {
             var R = 6371e3; // metres
             var φ1 = lat1 * Math.PI/180;
@@ -90,13 +96,15 @@
             return d;
         }
 
-        // Add AR camera to the scene
         var scene = document.querySelector('a-scene');
         var camera = document.createElement('a-camera');
-        camera.setAttribute('gps-camera', 'gpsMinDistance: 5');
+        camera.setAttribute('gps-camera', 'gpsMinDistance: 5; maxDistance: 10000');
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
+
+        // Initial log for position
+        console.log('Initial GPS Coordinates:', initialCoords.latitude, initialCoords.longitude);
     }
 </script>
 
@@ -110,11 +118,10 @@
             value="Stair"
             look-at="[gps-camera]"
             scale="10 10 10"
-            gps-entity-place="latitude: 48.1399; longitude: 14.2360;"
+            gps-entity-place="latitude: 48.1399131; longitude: 14.2359681;"
             visible="false"
     ></a-text>
 </a-scene>
 
 </body>
 </html>
-
