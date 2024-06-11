@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,22 +23,43 @@
 <div id="debug-info">Distance: N/A</div>
 
 <script>
-    if (!AFRAME.components['check-distance']) {
+    // Request location permissions on page load
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    console.log('GPS permission granted', position);
+
+                    // Initialize AR scene after permission is granted
+                    initARScene();
+                },
+                function(error) {
+                    console.error('Error requesting GPS permission', error);
+                    alert('GPS permission is required to use this application.');
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    };
+
+    // Initialize AR scene
+    function initARScene() {
         AFRAME.registerComponent('check-distance', {
-            tick: function () {
+            tick: function() {
                 var textEntity = document.querySelector('#info-text');
                 var debugInfo = document.querySelector('#debug-info');
 
+                // Get the GPS position of the camera and the entity
                 var cameraPosition = this.el.components['gps-camera'].currentCoords;
                 var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
+                // Calculate the distance using the Haversine formula
                 if (cameraPosition && entityPosition) {
                     var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
                     debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
-                    console.log('Camera Position:', cameraPosition.latitude, cameraPosition.longitude);
-                    console.log('Entity Position:', entityPosition.latitude, entityPosition.longitude);
-                    console.log('Calculated Distance:', distance);
 
+                    // Toggle visibility based on distance
                     if (distance <= 5) {
                         textEntity.setAttribute('visible', true);
                     } else {
@@ -48,26 +70,25 @@
                 }
             }
         });
-    }
 
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        var R = 6371e3; // metres
-        var φ1 = lat1 * Math.PI / 180;
-        var φ2 = lat2 * Math.PI / 180;
-        var Δφ = (lat2 - lat1) * Math.PI / 180;
-        var Δλ = (lon2 - lon1) * Math.PI / 180;
+        // Calculate the distance between two points using the Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371e3; // metres
+            var φ1 = lat1 * Math.PI/180;
+            var φ2 = lat2 * Math.PI/180;
+            var Δφ = (lat2-lat1) * Math.PI/180;
+            var Δλ = (lon2-lon1) * Math.PI/180;
 
-        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math
-                .cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-        var d = R * c; // in metres
-        return d;
-    }
+            var d = R * c; // in metres
+            return d;
+        }
 
-    function initARScene() {
+        // Add AR camera to the scene
         var scene = document.querySelector('a-scene');
         var camera = document.createElement('a-camera');
         camera.setAttribute('gps-camera', 'gpsMinDistance: 5');
@@ -75,34 +96,6 @@
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
     }
-
-    function requestGPS() {
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(
-                function (position) {
-                    console.log('GPS permission granted', position);
-                    if (!document.querySelector('a-camera')) {
-                        initARScene();
-                    }
-                },
-                function (error) {
-                    console.error('Error requesting GPS permission', error);
-                    if (error.code === error.PERMISSION_DENIED) {
-                        alert('GPS permission is required to use this application.');
-                    } else {
-                        alert('An error occurred while retrieving your location. Please ensure GPS is enabled.');
-                    }
-                },
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
-            );
-        } else {
-            alert('Geolocation is not supported by this browser.');
-        }
-    }
-
-    window.onload = function () {
-        requestGPS();
-    };
 </script>
 
 <a-scene
