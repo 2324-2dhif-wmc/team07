@@ -22,27 +22,22 @@
 <div id="debug-info">Distance: N/A</div>
 
 <script>
-    // Initialize AR scene
-    function initARScene() {
+    if (!AFRAME.components['check-distance']) {
         AFRAME.registerComponent('check-distance', {
-            tick: function() {
+            tick: function () {
                 var textEntity = document.querySelector('#info-text');
                 var debugInfo = document.querySelector('#debug-info');
 
-                // Get the GPS position of the camera and the entity
                 var cameraPosition = this.el.components['gps-camera'].currentCoords;
                 var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
-                // Log current positions for debugging
-                console.log('Camera Position:', cameraPosition);
-                console.log('Entity Position:', entityPosition);
-
-                // Calculate the distance using the Haversine formula
                 if (cameraPosition && entityPosition) {
                     var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
                     debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
+                    console.log('Camera Position:', cameraPosition.latitude, cameraPosition.longitude);
+                    console.log('Entity Position:', entityPosition.latitude, entityPosition.longitude);
+                    console.log('Calculated Distance:', distance);
 
-                    // Toggle visibility based on distance
                     if (distance <= 5) {
                         textEntity.setAttribute('visible', true);
                     } else {
@@ -53,25 +48,25 @@
                 }
             }
         });
+    }
 
-        // Calculate the distance between two points using the Haversine formula
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371e3; // metres
-            var φ1 = lat1 * Math.PI/180;
-            var φ2 = lat2 * Math.PI/180;
-            var Δφ = (lat2-lat1) * Math.PI/180;
-            var Δλ = (lon2-lon1) * Math.PI/180;
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        var R = 6371e3; // metres
+        var φ1 = lat1 * Math.PI / 180;
+        var φ2 = lat2 * Math.PI / 180;
+        var Δφ = (lat2 - lat1) * Math.PI / 180;
+        var Δλ = (lon2 - lon1) * Math.PI / 180;
 
-            var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-            var d = R * c; // in metres
-            return d;
-        }
+        var d = R * c; // in metres
+        return d;
+    }
 
-        // Add AR camera to the scene
+    function initARScene() {
         var scene = document.querySelector('a-scene');
         var camera = document.createElement('a-camera');
         camera.setAttribute('gps-camera', 'gpsMinDistance: 5');
@@ -80,17 +75,16 @@
         scene.appendChild(camera);
     }
 
-    // Request location permissions and initialize AR scene on page load
-    window.onload = function() {
+    window.onload = function () {
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(
-                function(position) {
+                function (position) {
                     console.log('GPS permission granted', position);
-
-                    // Initialize AR scene after permission is granted
-                    initARScene();
+                    if (!document.querySelector('a-camera')) {
+                        initARScene();
+                    }
                 },
-                function(error) {
+                function (error) {
                     console.error('Error requesting GPS permission', error);
                     alert('GPS permission is required to use this application.');
                 },
