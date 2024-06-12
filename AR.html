@@ -81,8 +81,8 @@
                         console.log('Entity Position:', entityPosition);
                         console.log('Distance:', distance);
 
-                        // Make the old entity always visible for debugging purposes
-                        boxEntity.setAttribute('visible', false);  // Keeping the old entity invisible
+                        // Make the old entity invisible
+                        boxEntity.setAttribute('visible', false);
                     } else {
                         debugInfo.innerHTML = 'Distance: calculating...';
                         console.log('Calculating distance...');
@@ -117,7 +117,7 @@
     }
 </script>
 
-<a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false' renderer='antialias: true; alpha: true'>
+<a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;" renderer="antialias: true; alpha: true">
     <a-camera
             id="camera"
             gps-new-camera="gpsMinDistance: 0; maxDistance: 10000"
