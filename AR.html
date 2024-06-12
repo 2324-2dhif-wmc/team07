@@ -111,7 +111,7 @@
 
         var scene = document.querySelector('a-scene');
         var camera = document.createElement('a-camera');
-        camera.setAttribute('gps-camera', 'gpsMinDistance: 5; maxDistance: 10000');
+        camera.setAttribute('gps-camera', 'gpsMinDistance: 0; maxDistance: 10000');
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
