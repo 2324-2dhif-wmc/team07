@@ -10,6 +10,11 @@ let timerStopped = false;
 let randomizePosition = false;
 let initialCoords;
 
+document.getElementById('toggle-randomize').addEventListener('click', function() {
+    randomizePosition = !randomizePosition;
+    this.textContent = randomizePosition ? 'Disable Random Position' : 'Enable Random Position';
+});
+
 function requestGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
