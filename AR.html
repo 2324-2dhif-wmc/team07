@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>GeoAR.js demo</title>
+    <title>GeoAR.js Demo</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -16,30 +16,49 @@
             padding: 10px;
             z-index: 1000;
         }
+        #end-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: none;
+            z-index: 1001;
+        }
     </style>
 </head>
 <body>
 <div id="debug-info">Distance: N/A</div>
+<div id="end-screen">You reached the point in <span id="time-taken"></span>!</div>
 
 <script>
     window.onload = function() {
         requestGPS();
+        startTimer();
     };
 
     let componentRegistered = false;
+    let startTime;
+    let intervalId;
+    let randomizePosition = false;
+    let initialCoords;
 
     function requestGPS() {
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(
                 function(position) {
                     if (!componentRegistered) {
+                        initialCoords = position.coords;
                         initARScene(position.coords);
                     }
                 },
                 function(error) {
                     handleGPSError(error);
                 },
-                { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+                { enableHighAccuracy: true, maximumAge: 500, timeout: 5000 }
             );
         } else {
             alert('Geolocation is not supported by this browser.');
@@ -56,7 +75,7 @@
                 break;
             case error.TIMEOUT:
                 alert('The request to get user location timed out. Retrying...');
-                setTimeout(requestGPS, 10000);
+                setTimeout(requestGPS, 5000);
                 break;
             default:
                 alert('An unknown error occurred. Please try again.');
@@ -64,7 +83,36 @@
         }
     }
 
-    function initARScene(initialCoords) {
+    function startTimer() {
+        startTime = Date.now();
+        intervalId = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+        let currentTime = Date.now();
+        let elapsedTime = currentTime - startTime;
+        let seconds = Math.floor(elapsedTime / 1000) % 60;
+        let minutes = Math.floor(elapsedTime / 60000);
+        document.getElementById('debug-info').innerHTML += ` | Time: ${minutes}m ${seconds}s`;
+    }
+
+    function showEndScreen() {
+        clearInterval(intervalId);
+        let currentTime = Date.now();
+        let elapsedTime = currentTime - startTime;
+        let seconds = Math.floor(elapsedTime / 1000) % 60;
+        let minutes = Math.floor(elapsedTime / 60000);
+        document.getElementById('time-taken').innerText = `${minutes} minutes and ${seconds} seconds`;
+        document.getElementById('end-screen').style.display = 'block';
+    }
+
+    function initARScene(coords) {
+        let targetCoords = { latitude: 48.1401107, longitude: 14.2360109 };
+
+        if (randomizePosition) {
+            targetCoords = getRandomCoordinates(coords.latitude, coords.longitude, 500);
+        }
+
         if (!componentRegistered) {
             AFRAME.registerComponent('check-distance', {
                 tick: function() {
@@ -77,10 +125,13 @@
                     if (cameraPosition && entityPosition) {
                         var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
                         debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
-                        
+
+                        if (distance <= 5) {
+                            showEndScreen();
+                        }
+
                         // Make the entity always visible for debugging purposes
                         boxEntity.setAttribute('visible', true);
-                        console.log('Entity is visible');
                     } else {
                         debugInfo.innerHTML = 'Distance: calculating...';
                     }
@@ -105,12 +156,33 @@
             return d;
         }
 
+        function getRandomCoordinates(lat, lon, radius) {
+            var y0 = lat;
+            var x0 = lon;
+            var rd = radius / 111300; // about 111300 meters in one degree
+
+            var u = Math.random();
+            var v = Math.random();
+
+            var w = rd * Math.sqrt(u);
+            var t = 2 * Math.PI * v;
+            var x = w * Math.cos(t);
+            var y = w * Math.sin(t);
+
+            var newLat = y + y0;
+            var newLon = x + x0;
+            return { latitude: newLat, longitude: newLon };
+        }
+
         var scene = document.querySelector('a-scene');
         var camera = document.createElement('a-camera');
         camera.setAttribute('gps-camera', 'gpsMinDistance: 0; maxDistance: 10000');
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
+
+        var boxEntity = document.querySelector('#info-box');
+        boxEntity.setAttribute('gps-entity-place', `latitude: ${targetCoords.latitude}; longitude: ${targetCoords.longitude};`);
     }
 </script>
 <a-scene
@@ -126,7 +198,7 @@
             rotation="0 0 0"
     ></a-camera>
     <a-text
-            value = "Hello World"
+            value="Hello World"
             id="info-box"
             color="red"
             scale="120 120 120"
