@@ -10,11 +10,6 @@ let timerStopped = false;
 let randomizePosition = false;
 let initialCoords;
 
-document.getElementById('toggle-randomize').addEventListener('click', function() {
-    randomizePosition = !randomizePosition;
-    this.textContent = randomizePosition ? 'Disable Random Position' : 'Enable Random Position';
-});
-
 function requestGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -27,7 +22,7 @@ function requestGPS() {
             function(error) {
                 handleGPSError(error);
             },
-            { enableHighAccuracy: true, maximumAge: 500, timeout: 5000 }
+            { enableHighAccuracy: true, maximumAge: 250, timeout: 5000 }
         );
     } else {
         alert('Geolocation is not supported by this browser.');
@@ -110,7 +105,6 @@ function initARScene(coords) {
                         showEndScreen();
                     }
 
-                    // Make the entity always visible for debugging purposes
                     boxEntity.setAttribute('visible', true);
                 } else {
                     let timeInfo = debugInfo.innerHTML.includes('|') ? debugInfo.innerHTML.split('|')[1].trim() : 'Time: calculating...';
@@ -122,13 +116,13 @@ function initARScene(coords) {
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        var R = 6371e3; // metres
-        var φ1 = lat1 * Math.PI / 180;
-        var φ2 = lat2 * Math.PI / 180;
-        var Δφ = (lat2 - lat1) * Math.PI / 180;
+        var R = 6371e3; // radius earth in meter
+        var φ1 = lat1 * Math.PI / 180; // latitude in radiant
+        var φ2 = lat2 * Math.PI / 180; // longitude in radiant
+        var Δφ = (lat2 - lat1) * Math.PI / 180;//delta
         var Δλ = (lon2 - lon1) * Math.PI / 180;
 
-        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + //quadratische Abweichung
             Math.cos(φ1) * Math.cos(φ2) *
             Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
