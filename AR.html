@@ -71,8 +71,8 @@
                     var boxEntity = document.querySelector('#info-box');
                     var debugInfo = document.querySelector('#debug-info');
 
-                    var cameraPosition = this.el.components['gps-new-camera'].currentCoords;
-                    var entityPosition = boxEntity.components['gps-new-entity-place'].attrValue;
+                    var cameraPosition = this.el.components['gps-camera'].currentCoords;
+                    var entityPosition = boxEntity.components['gps-entity-place'].attrValue;
 
                     if (cameraPosition && entityPosition) {
                         var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
@@ -81,9 +81,8 @@
                         console.log('Entity Position:', entityPosition);
                         console.log('Distance:', distance);
 
-                        // Make the entity always visible for debugging purposes
-                        boxEntity.setAttribute('visible', true);
-                        console.log('Entity is visible');
+                        // Make the old entity always visible for debugging purposes
+                        boxEntity.setAttribute('visible', false);  // Keeping the old entity invisible
                     } else {
                         debugInfo.innerHTML = 'Distance: calculating...';
                         console.log('Calculating distance...');
@@ -111,7 +110,7 @@
 
         var scene = document.querySelector('a-scene');
         var camera = document.createElement('a-camera');
-        camera.setAttribute('gps-new-camera', 'gpsMinDistance: 5');
+        camera.setAttribute('gps-camera', 'gpsMinDistance: 0; maxDistance: 10000');
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
@@ -121,23 +120,29 @@
 <a-scene
         vr-mode-ui="enabled: false"
         embedded
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false"
-        renderer="antialias: true; alpha: true"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
     <a-camera
             id="camera"
-            gps-new-camera="gpsMinDistance: 5"
+            gps-camera="gpsMinDistance: 0; maxDistance: 10000"
             rotation-reader=""
             check-distance=""
             rotation="0 0 0"
     ></a-camera>
+    <a-text
+            value="Hello World"
+            id="info-box"
+            color="red"
+            scale="120 120 120"
+            look-at="[gps-camera]"
+            gps-entity-place="latitude: 48.1401107; longitude: 14.2360109;"
+            visible="false"
+    ></a-text>
     <a-entity
             material="color: red"
             geometry="primitive: box"
-            id="info-box"
-            gps-new-entity-place="latitude: 48.1401107; longitude: 14.2360109"
+            gps-new-entity-place="latitude: 48.1401107; longitude: 14.2360109;"
             scale="10 10 10"
-            visible="true"
     ></a-entity>
     <arjs-debug></arjs-debug>
 </a-scene>
