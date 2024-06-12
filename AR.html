@@ -27,27 +27,19 @@
     };
 
     let componentRegistered = false;
-    let gpsReadings = [];
 
     function requestGPS() {
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(
                 function(position) {
-                    if (position.coords.accuracy <= 30) { // Only accept readings with accuracy less than 30 meters
-                        gpsReadings.push(position.coords);
-                        if (gpsReadings.length > 5) {
-                            gpsReadings.shift(); // Keep only the last 5 readings
-                        }
-                        const averagedCoords = averageGPS(gpsReadings);
-                        if (!componentRegistered) {
-                            initARScene(averagedCoords);
-                        }
+                    if (!componentRegistered) {
+                        initARScene(position.coords);
                     }
                 },
                 function(error) {
                     handleGPSError(error);
                 },
-                { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 }
+                { enableHighAccuracy: false, maximumAge: 5000, timeout: 30000 } // Increased timeout to 30 seconds, maximumAge to 5 seconds, high accuracy disabled
             );
         } else {
             alert('Geolocation is not supported by this browser.');
@@ -55,63 +47,39 @@
     }
 
     function handleGPSError(error) {
-        switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert('GPS permission is required to use this application.');
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert('Location information is unavailable. Please ensure your GPS is enabled.');
-                break;
-            case error.TIMEOUT:
-                alert('The request to get user location timed out. Retrying...');
-                setTimeout(requestGPS, 10000);
-                break;
-            default:
-                alert('An unknown error occurred. Please try again.');
-                break;
+        if (error.code === error.PERMISSION_DENIED) {
+            alert('GPS permission is required to use this application.');
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+            alert('Location information is unavailable. Please ensure your GPS is enabled.');
+        } else if (error.code === error.TIMEOUT) {
+            alert('The request to get user location timed out. Retrying...');
+            setTimeout(requestGPS, 10000); // Retry the GPS request after 10 seconds
+        } else {
+            alert('An unknown error occurred. Please try again.');
         }
-    }
-
-    function averageGPS(readings) {
-        let totalLat = 0;
-        let totalLon = 0;
-        readings.forEach(reading => {
-            totalLat += reading.latitude;
-            totalLon += reading.longitude;
-        });
-        return {
-            latitude: totalLat / readings.length,
-            longitude: totalLon / readings.length
-        };
     }
 
     function initARScene(initialCoords) {
         if (!componentRegistered) {
             AFRAME.registerComponent('check-distance', {
                 tick: function() {
-                    var boxEntity = document.querySelector('#info-box');
+                    var textEntity = document.querySelector('#info-text');
                     var debugInfo = document.querySelector('#debug-info');
 
                     var cameraPosition = this.el.components['gps-camera'].currentCoords;
-                    var entityPosition = boxEntity.components['gps-entity-place'].attrValue;
+                    var entityPosition = textEntity.components['gps-entity-place'].attrValue;
 
                     if (cameraPosition && entityPosition) {
                         var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
-                        debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters<br>Accuracy: ' + cameraPosition.accuracy + ' meters';
-                        console.log('Camera Position:', cameraPosition);
-                        console.log('Entity Position:', entityPosition);
-                        console.log('Distance:', distance);
+                        debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
 
                         if (distance <= 5) {
-                            boxEntity.setAttribute('visible', true);
-                            console.log('Entity is visible');
+                            textEntity.setAttribute('visible', true);
                         } else {
-                            boxEntity.setAttribute('visible', false);
-                            console.log('Entity is not visible');
+                            textEntity.setAttribute('visible', false);
                         }
                     } else {
                         debugInfo.innerHTML = 'Distance: calculating...';
-                        console.log('Calculating distance...');
                     }
                 }
             });
@@ -120,15 +88,15 @@
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             var R = 6371e3; // metres
-            var φ1 = lat1 * Math.PI / 180;
-            var φ2 = lat2 * Math.PI / 180;
-            var Δφ = (lat2 - lat1) * Math.PI / 180;
-            var Δλ = (lon2 - lon1) * Math.PI / 180;
+            var φ1 = lat1 * Math.PI/180;
+            var φ2 = lat2 * Math.PI/180;
+            var Δφ = (lat2-lat1) * Math.PI/180;
+            var Δλ = (lon1-lon2) * Math.PI/180;
 
-            var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
                 Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
             var d = R * c; // in metres
             return d;
@@ -148,17 +116,14 @@
         embedded
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
-    <a-box
-            id="info-box"
-            color="red"
-            depth="1"
-            height="1"
-            width="1"
+    <a-text
+            id="info-text"
+            value="Stair"
             look-at="[gps-camera]"
             scale="10 10 10"
             gps-entity-place="latitude: 48.1399131; longitude: 14.2359681;"
             visible="false"
-    ></a-box>
+    ></a-text>
 </a-scene>
 
 </body>
