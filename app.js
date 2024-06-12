@@ -22,7 +22,7 @@ function requestGPS() {
             function(error) {
                 handleGPSError(error);
             },
-            { enableHighAccuracy: true, maximumAge: 250, timeout: 5000 }
+            { enableHighAccuracy: true, maximumAge: 500, timeout: 5000 }
         );
     } else {
         alert('Geolocation is not supported by this browser.');
