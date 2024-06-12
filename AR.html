@@ -22,80 +22,119 @@
 <div id="debug-info">Distance: N/A</div>
 
 <script>
-    // Request location permissions on page load
     window.onload = function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    console.log('GPS permission granted', position);
+        requestGPS();
+    };
 
-                    // Initialize AR scene after permission is granted
-                    initARScene();
+    let componentRegistered = false;
+
+    function requestGPS() {
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(
+                function(position) {
+                    if (!componentRegistered) {
+                        initARScene(position.coords);
+                    }
                 },
                 function(error) {
-                    console.error('Error requesting GPS permission', error);
-                    alert('GPS permission is required to use this application.');
-                }
+                    handleGPSError(error);
+                },
+                { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
             );
         } else {
             alert('Geolocation is not supported by this browser.');
         }
-    };
+    }
 
-    // Initialize AR scene
-    function initARScene() {
-        const scene = document.querySelector('a-scene');
-        const textEntity = document.querySelector('#info-text');
-        const debugInfo = document.querySelector('#debug-info');
+    function handleGPSError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert('GPS permission is required to use this application.');
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert('Location information is unavailable. Please ensure your GPS is enabled.');
+                break;
+            case error.TIMEOUT:
+                alert('The request to get user location timed out. Retrying...');
+                setTimeout(requestGPS, 10000);
+                break;
+            default:
+                alert('An unknown error occurred. Please try again.');
+                break;
+        }
+    }
 
-        // Register component to check distance and update text visibility
-        AFRAME.registerComponent('check-distance', {
-            tick: function() {
-                const camera = this.el.getObject3D('camera');
-                const textPosition = textEntity.object3D.position;
-                const cameraPosition = camera.position;
+    function initARScene(initialCoords) {
+        if (!componentRegistered) {
+            AFRAME.registerComponent('check-distance', {
+                tick: function() {
+                    var boxEntity = document.querySelector('#info-box');
+                    var debugInfo = document.querySelector('#debug-info');
 
-                // Calculate distance between camera and text entity
-                const distance = cameraPosition.distanceTo(textPosition);
+                    var cameraPosition = this.el.components['gps-camera'].currentCoords;
+                    var entityPosition = boxEntity.components['gps-entity-place'].attrValue;
 
-                debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2);
-
-                // Toggle text visibility based on distance
-                if (distance <= 5) {
-                    textEntity.setAttribute('visible', true);
-                } else {
-                    textEntity.setAttribute('visible', false);
+                    if (cameraPosition && entityPosition) {
+                        var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
+                        debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
+                        
+                        // Make the entity always visible for debugging purposes
+                        boxEntity.setAttribute('visible', true);
+                        console.log('Entity is visible');
+                    } else {
+                        debugInfo.innerHTML = 'Distance: calculating...';
+                    }
                 }
-            }
-        });
+            });
+            componentRegistered = true;
+        }
 
-        // Add AR text entity to the scene
-        textEntity.setAttribute('gps-entity-place', {
-            latitude: 48.1435,
-            longitude: 14.2356
-        });
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371e3; // metres
+            var φ1 = lat1 * Math.PI / 180;
+            var φ2 = lat2 * Math.PI / 180;
+            var Δφ = (lat2 - lat1) * Math.PI / 180;
+            var Δλ = (lon2 - lon1) * Math.PI / 180;
 
-        // Initialize AR camera with minimum distance
-        const camera = document.createElement('a-camera');
-        camera.setAttribute('gps-camera', 'gpsMinDistance: 5');
+            var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            var d = R * c; // in metres
+            return d;
+        }
+
+        var scene = document.querySelector('a-scene');
+        var camera = document.createElement('a-camera');
+        camera.setAttribute('gps-camera', 'gpsMinDistance: 0; maxDistance: 10000');
         camera.setAttribute('rotation-reader', '');
         camera.setAttribute('check-distance', '');
         scene.appendChild(camera);
     }
 </script>
-
 <a-scene
         vr-mode-ui="enabled: false"
         embedded
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
+    <a-camera
+            id="camera"
+            gps-camera="gpsMinDistance: 0; maxDistance: 10000"
+            rotation-reader=""
+            check-distance=""
+            rotation="0 0 0"
+    ></a-camera>
     <a-text
-            id="info-text"
-            value="Stair"
+            value = "Hello World"
+            id="info-box"
+            color="red"
+            scale="120 120 120"
             look-at="[gps-camera]"
-            scale="10 10 10"
-            visible="false"
+            gps-entity-place="latitude: 48.1401107; longitude: 14.2360109;"
+            visible="true"
     ></a-text>
+    <arjs-debug></arjs-debug>
 </a-scene>
 
 </body>
