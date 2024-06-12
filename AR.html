@@ -39,7 +39,7 @@
                 function(error) {
                     handleGPSError(error);
                 },
-                { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 }
+                { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
             );
         } else {
             alert('Geolocation is not supported by this browser.');
@@ -76,18 +76,14 @@
 
                     if (cameraPosition && entityPosition) {
                         var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
-                        debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters<br>Accuracy: ' + cameraPosition.accuracy + ' meters';
+                        debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
                         console.log('Camera Position:', cameraPosition);
                         console.log('Entity Position:', entityPosition);
                         console.log('Distance:', distance);
 
-                        if (distance <= 5) {
-                            boxEntity.setAttribute('visible', true);
-                            console.log('Entity is visible');
-                        } else {
-                            boxEntity.setAttribute('visible', false);
-                            console.log('Entity is not visible');
-                        }
+                        // Make the entity always visible for debugging purposes
+                        boxEntity.setAttribute('visible', true);
+                        console.log('Entity is visible');
                     } else {
                         debugInfo.innerHTML = 'Distance: calculating...';
                         console.log('Calculating distance...');
@@ -136,7 +132,7 @@
             look-at="[gps-camera]"
             scale="10 10 10"
             gps-entity-place="latitude: 48.1399131; longitude: 14.2359681;"
-            visible="false"
+            visible="true"
     ></a-box>
 </a-scene>
 
