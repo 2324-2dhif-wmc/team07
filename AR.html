@@ -43,6 +43,7 @@
     let componentRegistered = false;
     let startTime;
     let intervalId;
+    let timerStopped = false;
     let randomizePosition = false;
     let initialCoords;
 
@@ -89,14 +90,23 @@
     }
 
     function updateTimer() {
+        if (timerStopped) return;
+
         let currentTime = Date.now();
         let elapsedTime = currentTime - startTime;
         let seconds = Math.floor(elapsedTime / 1000) % 60;
         let minutes = Math.floor(elapsedTime / 60000);
-        document.getElementById('debug-info').innerHTML += ` | Time: ${minutes}m ${seconds}s`;
+        let debugInfo = document.getElementById('debug-info').innerHTML;
+        let timeInfo = `Time: ${minutes}m ${seconds}s`;
+        if (debugInfo.includes('|')) {
+            document.getElementById('debug-info').innerHTML = `${debugInfo.split('|')[0]} | ${timeInfo}`;
+        } else {
+            document.getElementById('debug-info').innerHTML += ` | ${timeInfo}`;
+        }
     }
 
     function showEndScreen() {
+        timerStopped = true;
         clearInterval(intervalId);
         let currentTime = Date.now();
         let elapsedTime = currentTime - startTime;
@@ -104,6 +114,7 @@
         let minutes = Math.floor(elapsedTime / 60000);
         document.getElementById('time-taken').innerText = `${minutes} minutes and ${seconds} seconds`;
         document.getElementById('end-screen').style.display = 'block';
+        document.getElementById('debug-info').innerHTML = `Distance: 0 meters | Time: ${minutes}m ${seconds}s`;
     }
 
     function initARScene(coords) {
@@ -124,16 +135,18 @@
 
                     if (cameraPosition && entityPosition) {
                         var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
-                        debugInfo.innerHTML = 'Distance: ' + distance.toFixed(2) + ' meters';
+                        let timeInfo = debugInfo.innerHTML.includes('|') ? debugInfo.innerHTML.split('|')[1].trim() : 'Time: calculating...';
+                        debugInfo.innerHTML = `Distance: ${distance.toFixed(2)} meters | ${timeInfo}`;
 
-                        if (distance <= 5) {
+                        if (distance <= 5 && !timerStopped) {
                             showEndScreen();
                         }
 
                         // Make the entity always visible for debugging purposes
                         boxEntity.setAttribute('visible', true);
                     } else {
-                        debugInfo.innerHTML = 'Distance: calculating...';
+                        let timeInfo = debugInfo.innerHTML.includes('|') ? debugInfo.innerHTML.split('|')[1].trim() : 'Time: calculating...';
+                        debugInfo.innerHTML = `Distance: calculating... | ${timeInfo}`;
                     }
                 }
             });
