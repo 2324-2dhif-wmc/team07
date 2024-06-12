@@ -117,14 +117,10 @@
     }
 </script>
 
-<a-scene
-        vr-mode-ui="enabled: false"
-        embedded
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
->
+<a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false' renderer='antialias: true; alpha: true'>
     <a-camera
             id="camera"
-            gps-camera="gpsMinDistance: 0; maxDistance: 10000"
+            gps-new-camera="gpsMinDistance: 0; maxDistance: 10000"
             rotation-reader=""
             check-distance=""
             rotation="0 0 0"
