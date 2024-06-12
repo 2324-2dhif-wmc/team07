@@ -123,6 +123,13 @@
         embedded
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
 >
+    <a-camera
+            id="camera"
+            gps-camera="gpsMinDistance: 0; maxDistance: 10000"
+            rotation-reader=""
+            check-distance=""
+            rotation="0 0 0"
+    ></a-camera>
     <a-box
             id="info-box"
             color="red"
@@ -131,7 +138,7 @@
             width="1"
             look-at="[gps-camera]"
             scale="10 10 10"
-            gps-entity-place="latitude: 48.1399131; longitude: 14.2359681;"
+            gps-entity-place="latitude: 48.1401107; longitude: 14.2360109;"
             visible="true"
     ></a-box>
 </a-scene>
