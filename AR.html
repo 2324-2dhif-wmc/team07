@@ -130,17 +130,16 @@
             check-distance=""
             rotation="0 0 0"
     ></a-camera>
-    <a-box
+    <a-sphere
             id="info-box"
             color="red"
-            depth="1"
-            height="1"
-            width="1"
+            radius="1"
+            scale="1 1 1"
             look-at="[gps-camera]"
-            scale="10 10 10"
-            gps-entity-place="latitude: 48.1401107; longitude: 14.2360109;"
+            gps-entity-place="latitude: 48.1401107; longitude: 14.2360109; altitude: 0"
             visible="true"
-    ></a-box>
+    ></a-sphere>
+    <arjs-debug></arjs-debug>
 </a-scene>
 
 </body>
