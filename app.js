@@ -81,7 +81,7 @@ function showEndScreen() {
 }
 
 function initARScene(coords) {
-    let targetCoords = { latitude: 48.1401107, longitude: 14.2360109 };
+    let targetCoords = { latitude: 48.2684159, longitude: 14.2491783 };
 
     if (randomizePosition) {
         targetCoords = getRandomCoordinates(coords.latitude, coords.longitude, 500);
