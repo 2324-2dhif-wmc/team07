@@ -114,7 +114,7 @@ function initARScene(coords) {
         });
         componentRegistered = true;
     }
-
+//Haversine Formel
     function calculateDistance(lat1, lon1, lat2, lon2) {
         var R = 6371e3; // radius earth in meter
         var φ1 = lat1 * Math.PI / 180; // latitude in radiant
@@ -127,7 +127,7 @@ function initARScene(coords) {
             Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        var d = R * c; // in metres
+        var d = R * c;
         return d;
     }
 
