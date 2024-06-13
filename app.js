@@ -85,7 +85,6 @@ function initARScene(coords) {
     if (randomizePosition) {
         targetCoords = getRandomCoordinates(coords.latitude, coords.longitude, 500);
     }
-
     if (!componentRegistered) {
         AFRAME.registerComponent('check-distance', {
             tick: function() {
