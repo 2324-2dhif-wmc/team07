@@ -79,9 +79,8 @@ function showEndScreen() {
     document.getElementById('end-screen').style.display = 'block';
     document.getElementById('debug-info').innerHTML = `Distance: 0 meters | Time: ${minutes}m ${seconds}s`;
 }
-
 function initARScene(coords) {
-    let targetCoords = { latitude: 48.2684159, longitude: 14.2491783 };
+    let targetCoords = { latitude: 48.2683223, longitude: 14.2521421 };
 
     if (randomizePosition) {
         targetCoords = getRandomCoordinates(coords.latitude, coords.longitude, 500);
