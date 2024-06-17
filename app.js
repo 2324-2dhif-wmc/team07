@@ -80,22 +80,23 @@ function showEndScreen() {
     document.getElementById('debug-info').innerHTML = `Distance: 0 meters | Time: ${minutes}m ${seconds}s`;
 }
 function initARScene(coords) {
-    let targetCoords = { latitude: 48.2683223, longitude: 14.2521421 };
+    let targetCoords = { latitude: 48.268231, longitude: 14.252070 };
 
     if (randomizePosition) {
         targetCoords = getRandomCoordinates(coords.latitude, coords.longitude, 500);
     }
+
     if (!componentRegistered) {
         AFRAME.registerComponent('check-distance', {
             tick: function() {
-                var boxEntity = document.querySelector('#info-box');
-                var debugInfo = document.querySelector('#debug-info');
+                const boxEntity = document.querySelector('#info-box');
+                const debugInfo = document.querySelector('#debug-info');
 
-                var cameraPosition = this.el.components['gps-camera'].currentCoords;
-                var entityPosition = boxEntity.components['gps-entity-place'].attrValue;
+                const cameraPosition = this.el.components['gps-camera'].currentCoords;
+                const entityPosition = boxEntity.components['gps-entity-place'].attrValue;
 
                 if (cameraPosition && entityPosition) {
-                    var distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
+                    const distance = calculateDistance(cameraPosition.latitude, cameraPosition.longitude, entityPosition.latitude, entityPosition.longitude);
                     let timeInfo = debugInfo.innerHTML.includes('|') ? debugInfo.innerHTML.split('|')[1].trim() : 'Time: calculating...';
                     debugInfo.innerHTML = `Distance: ${distance.toFixed(2)} meters | ${timeInfo}`;
 
@@ -112,48 +113,47 @@ function initARScene(coords) {
         });
         componentRegistered = true;
     }
-//Haversine Formel
+
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        var R = 6371e3; // radius earth in meter
-        var φ1 = lat1 * Math.PI / 180; // latitude in radiant
-        var φ2 = lat2 * Math.PI / 180; // longitude in radiant
-        var Δφ = (lat2 - lat1) * Math.PI / 180;//delta
-        var Δλ = (lon2 - lon1) * Math.PI / 180;
+        const R = 6371e3; // radius earth in meter
+        const w1 = lat1 * Math.PI / 180; // latitude in radiant
+        const w2 = lat2 * Math.PI / 180; // longitude in radiant
+        const dw = (lat2 - lat1) * Math.PI / 180;//delta
+        const dl = (lon2 - lon1) * Math.PI / 180;
 
-        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + //quadratische Abweichung
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const a = Math.sin(dw / 2) * Math.sin(dw / 2) + //quadratische Abweichung
+            Math.cos(w1) * Math.cos(w2) *
+            Math.sin(dl / 2) * Math.sin(dl / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        var d = R * c;
-        return d;
+        return R * c;
     }
 
     function getRandomCoordinates(lat, lon, radius) {
-        var y0 = lat;
-        var x0 = lon;
-        var rd = radius / 111300; // about 111300 meters in one degree
+        const y0 = lat;
+        const x0 = lon;
+        const rd = radius / 111300; // about 111300 meters in one degree
 
-        var u = Math.random();
-        var v = Math.random();
+        const u = Math.random();
+        const v = Math.random();
 
-        var w = rd * Math.sqrt(u);
-        var t = 2 * Math.PI * v;
-        var x = w * Math.cos(t);
-        var y = w * Math.sin(t);
+        const w = rd * Math.sqrt(u);
+        const t = 2 * Math.PI * v;
+        const x = w * Math.cos(t);
+        const y = w * Math.sin(t);
 
-        var newLat = y + y0;
-        var newLon = x + x0;
+        const newLat = y + y0;
+        const newLon = x + x0;
         return { latitude: newLat, longitude: newLon };
     }
 
-    var scene = document.querySelector('a-scene');
-    var camera = document.createElement('a-camera');
+    const scene = document.querySelector('a-scene');
+    const camera = document.createElement('a-camera');
     camera.setAttribute('gps-camera', 'gpsMinDistance: 0; maxDistance: 10000');
     camera.setAttribute('rotation-reader', '');
     camera.setAttribute('check-distance', '');
     scene.appendChild(camera);
 
-    var boxEntity = document.querySelector('#info-box');
+    const boxEntity = document.querySelector('#info-box');
     boxEntity.setAttribute('gps-entity-place', `latitude: ${targetCoords.latitude}; longitude: ${targetCoords.longitude};`);
 }

@@ -35,6 +35,13 @@
             gps-entity-place="latitude: 48.2684159; longitude: 14.2491783;"
             visible="true"
     ></a-text>
+
+    <a-entity gps-entity-place="latitude: 48.268231; longitude: 14.252070;" collada-model="/assets/Charmander_ColladaMax.DAE" scale="2 2 2"></a-entity>
+
+    <a-entity id="info-box" gps-entity-place="latitude: 48.268231; longitude: 14.252070;" visible="false">
+        <a-text value="You are here" look-at="[gps-camera]" scale="50 50 50"></a-text>
+    </a-entity>
+
     <arjs-debug></arjs-debug>
 </a-scene>
 <script src="app.js" defer></script>
