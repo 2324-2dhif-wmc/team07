@@ -23,10 +23,7 @@
                 id="animated-asset"
                 src="assets/asset.gltf"
         ></a-asset-item>
-        <a-asset-item
-                id="wolf-asset"
-                src="assets/wolf-model.dae"
-        ></a-asset-item>
+
     </a-assets>
 
     <a-marker
@@ -48,14 +45,7 @@
                 gesture-handler
         ></a-entity>
 
-        <!-- Wolf Model Entity -->
-        <a-entity
-                id="wolf-model"
-                scale="10 10 10"
-                collada-model="#wolf-asset"
-                class="clickable"
-                gesture-handler
-        ></a-entity>
+        
     </a-marker>
 
     <a-entity camera></a-entity>
